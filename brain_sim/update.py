@@ -39,7 +39,7 @@ def step_predictive(brain, alpha, size = SIZE):
                     if 0 <= ny < size and 0 <= nx < size:
                         error    = errors[ny][nx]
                         weight = connections[y][x][dy_i][dx_i]
-                        connections[y][x][dy_i][dx_i] = max(-1.0, min(1.0, weight + alpha * error * predictions[y][x]))
+                        connections[y][x][dy_i][dx_i] = min(1.0, weight + alpha * error * predictions[y][x])
 
 
     for y, row in enumerate(predictions):
@@ -63,23 +63,23 @@ def step_predictive(brain, alpha, size = SIZE):
 
 
 
-def step_diffusion_legacy(brain, alpha):
-    g = brain.grid
-    neighbors = brain.neighbors
-    next_grid = [[[0.0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
-
-    for z, layer in enumerate(brain.grid):
-        for y, row in enumerate(layer):
-            for x, cell in enumerate(row):
-                total_strength = 0
-                count = 0
-                for n in neighbors[(z,y,x)]:
-                    nz, ny, nx = n
-                    total_strength += g[nz][ny][nx]
-                    count += 1
-                strength = (1-alpha) * g[z][y][x] + alpha * (total_strength / count)
-                next_grid[z][y][x] = strength
-    brain.grid = next_grid
+# def step_diffusion_legacy(brain, alpha):
+#     g = brain.grid
+#     neighbors = brain.neighbors
+#     next_grid = [[[0.0 for _ in range(size)] for _ in range(size)] for _ in range(size)]
+#
+#     for z, layer in enumerate(brain.grid):
+#         for y, row in enumerate(layer):
+#             for x, cell in enumerate(row):
+#                 total_strength = 0
+#                 count = 0
+#                 for n in neighbors[(z,y,x)]:
+#                     nz, ny, nx = n
+#                     total_strength += g[nz][ny][nx]
+#                     count += 1
+#                 strength = (1-alpha) * g[z][y][x] + alpha * (total_strength / count)
+#                 next_grid[z][y][x] = strength
+#     brain.grid = next_grid
 
 
 
