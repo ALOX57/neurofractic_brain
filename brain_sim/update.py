@@ -1,9 +1,11 @@
-from .config import SIZE, BETA
+from .config import SIZE, BETA, PATTERN_NAME
+from .patterns import PATTERNS
 import math
 
-def step_predictive_sin(brain, alpha, beta, t):
-    brain.sns = math.sin(t * 0.1)
+pattern_fn = PATTERNS[PATTERN_NAME]
 
+def step_predictive(brain, alpha, beta, t):
+    brain.sns = pattern_fn(t)
     brain.sens_hat = sum(p * w for p,w in zip(brain.prd, brain.connections))
     brain.error = brain.sns - brain.sens_hat
 
@@ -17,7 +19,7 @@ def step_predictive_sin(brain, alpha, beta, t):
         brain.prd[i] = max(0, min(1.0, brain.prd[i]))
 
 
-# def step_predictive(brain, alpha, size = SIZE):
+# def step_predictive_legacy(brain, alpha, size = SIZE):
 #     sensors     = brain.sns
 #     predictions = brain.prd
 #     connections = brain.connections

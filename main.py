@@ -1,6 +1,6 @@
 from brain_sim.config import SIZE, SEEDS, ALPHA, BETA, STEPS, TICK_S
 from brain_sim.brain import Brain
-from brain_sim.update import step_predictive_sin
+from brain_sim.update import step_predictive
 from brain_sim.timing import FixedRateLoop
 from brain_sim.viz import Viz
 
@@ -12,7 +12,7 @@ def main():
     log_interval = 5
 
     for t in range(STEPS):
-        step_predictive_sin(brain, ALPHA, BETA, t)
+        step_predictive(brain, ALPHA, BETA, t)
 
         if t % log_interval == 0:
             steps_log.append(t)
