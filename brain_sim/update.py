@@ -1,61 +1,81 @@
-from .config import SIZE
+from .config import SIZE, BETA
+import math
 
-def step_predictive(brain, alpha, size = SIZE):
-    sensors     = brain.sns
-    predictions = brain.prd
-    connections = brain.connections
-    sens_hat = brain.sens_hat
-    errors = brain.errors
+def step_predictive_sin(brain, alpha, beta, t):
+    brain.sns = math.sin(t * 0.1)
 
-    # zero sensory net
-    for y in range(size):
-        row=sens_hat[y]
-        for x in range(size):
-            row[x] = 0.0
+    brain.sens_hat = sum(p * w for p,w in zip(brain.prd, brain.connections))
+    brain.error = brain.sns - brain.sens_hat
 
+    for i in range(len(brain.connections)):
+        brain.connections[i] += alpha * brain.error * brain.prd[i]
+        brain.connections[i] = max(-1.0, min(1.0, brain.connections[i]))
 
-    for y, row in enumerate(predictions):
-        for x, cell in enumerate(row):
-            for dy_i in range(3):
-                for dx_i in range(3):
-                    dy = dy_i - 1
-                    dx = dx_i - 1
-                    ny, nx = y + dy, x + dx
-                    if 0 <= ny < size and 0 <= nx < size:
-                        sens_hat[ny][nx] += predictions[y][x] * connections[y][x][dy_i][dx_i]
+    for i in range(len(brain.prd)):
+        acc = brain.connections[i] * brain.sns
+        brain.prd[i] = acc + beta * brain.prd[i]
+        brain.prd[i] = max(0, min(1.0, brain.prd[i]))
 
 
-    for y in range(size):
-        for x in range(size):
-            errors[y][x] = sensors[y][x] - sens_hat[y][x]
+# def step_predictive(brain, alpha, size = SIZE):
+#     sensors     = brain.sns
+#     predictions = brain.prd
+#     connections = brain.connections
+#     sens_hat = brain.sens_hat
+#     errors = brain.errors
+#
+#     # zero sensory net
+#     for y in range(size):
+#         row=sens_hat[y]
+#         for x in range(size):
+#             row[x] = 0.0
+#
+#
+#     for y, row in enumerate(predictions):
+#         for x, cell in enumerate(row):
+#             for dy_i in range(3):
+#                 for dx_i in range(3):
+#                     dy = dy_i - 1
+#                     dx = dx_i - 1
+#                     ny, nx = y + dy, x + dx
+#                     if 0 <= ny < size and 0 <= nx < size:
+#                         sens_hat[ny][nx] += predictions[y][x] * connections[y][x][dy_i][dx_i]
+#
+#
+#     for y in range(size):
+#         for x in range(size):
+#             errors[y][x] = sensors[y][x] - sens_hat[y][x]
+#
+#     for y, row in enumerate(predictions):
+#         for x, cell in enumerate(row):
+#             for dy_i in range(3):
+#                 for dx_i in range(3):
+#                     dy = dy_i - 1
+#                     dx = dx_i - 1
+#                     ny, nx = y + dy, x + dx
+#                     if 0 <= ny < size and 0 <= nx < size:
+#                         error    = errors[ny][nx]
+#                         weight = connections[y][x][dy_i][dx_i]
+#                         connections[y][x][dy_i][dx_i] = min(1.0, weight + alpha * error * predictions[y][x])
+#
+#
+#     for y, row in enumerate(predictions):
+#         for x, cell in enumerate(row):
+#             acc = 0.0
+#             for dy_i in range(3):
+#                 for dx_i in range(3):
+#                     dy = dy_i - 1
+#                     dx = dx_i - 1
+#                     ny, nx = y + dy, x + dx
+#                     if 0 <= ny < size and 0 <= nx < size:
+#                         activation = sensors[ny][nx]
+#                         weight     = connections[y][x][dy_i][dx_i]
+#                         acc       += activation * weight
+#
+#             predictions[y][x] = max(0.0,min(1.0, acc))
 
-    for y, row in enumerate(predictions):
-        for x, cell in enumerate(row):
-            for dy_i in range(3):
-                for dx_i in range(3):
-                    dy = dy_i - 1
-                    dx = dx_i - 1
-                    ny, nx = y + dy, x + dx
-                    if 0 <= ny < size and 0 <= nx < size:
-                        error    = errors[ny][nx]
-                        weight = connections[y][x][dy_i][dx_i]
-                        connections[y][x][dy_i][dx_i] = min(1.0, weight + alpha * error * predictions[y][x])
 
 
-    for y, row in enumerate(predictions):
-        for x, cell in enumerate(row):
-            acc = 0.0
-            for dy_i in range(3):
-                for dx_i in range(3):
-                    dy = dy_i - 1
-                    dx = dx_i - 1
-                    ny, nx = y + dy, x + dx
-                    if 0 <= ny < size and 0 <= nx < size:
-                        activation = sensors[ny][nx]
-                        weight     = connections[y][x][dy_i][dx_i]
-                        acc       += activation * weight
-
-            predictions[y][x] = max(0.0,min(1.0, acc))
 
 
 
