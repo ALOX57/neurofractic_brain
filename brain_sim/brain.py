@@ -2,17 +2,22 @@ from .config import SIZE, OFF
 import random
 
 class Brain:
-    def __init__(self, n_predictions=9):
+    def __init__(self, n_predictions=10, n_predictions2 = 30):
         # one sensory neuron
         self.sns = 0.0
         self.sens_hat = 0.0
         self.error = 0.0
+        self.err_indiv = [0.0 for _ in range(n_predictions)]
 
         # prediction layer
         self.prd = [0.0 for _ in range(n_predictions)]
+        self.prd2 = [0.0 for _ in range(n_predictions2)]
 
         # one connection weight per prediction neuron
-        self.connections = [random.uniform(-0.03, 0.03) for _ in range(n_predictions)]
+        self.w_sens = [random.uniform(-0.03, 0.03) for _ in range(n_predictions)]
+
+        self.w_fire2 = [[random.uniform(-0.03, 0.03) for _ in range (n_predictions)] for _ in range(n_predictions2)]
+        self.w_err2 = [[random.uniform(-0.03, 0.03) for _ in range(n_predictions)] for _ in range(n_predictions2)]
 
     def set_sensory(self, v):
         self.sns = v

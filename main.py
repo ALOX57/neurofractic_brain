@@ -23,8 +23,9 @@ def main():
     print("Final sensory:", brain.sns)
     print("Final prediction:", brain.sens_hat)
     print("Final prediction error:", brain.error)
-    print("Connections:", brain.connections)
+    print("Connections:", brain.w_sens)
     print("Predictions:", brain.prd)
+
 
     viz.close()
 
