@@ -2,6 +2,31 @@ from brain_sim.brain import Brain
 from brain_sim.config import SEEDS, SIZE
 import matplotlib.pyplot as plt
 
+class Viz:
+    def __init__(self):
+        plt.ion()  # interactive mode for live updating
+        self.fig, self.ax = plt.subplots()
+        self.line_real, = self.ax.plot([], [], label="Real sine")
+        self.line_pred, = self.ax.plot([], [], label="Predicted", linestyle="--")
+        self.ax.legend()
+        self.ax.set_xlabel("Step")
+        self.ax.set_ylabel("Value")
+        self.ax.set_title("Prediction Convergence")
+        self.ax.set_ylim(-1.2, 1.2)
+
+    def update(self, steps, real_vals, pred_vals):
+        self.line_real.set_data(steps, real_vals)
+        self.line_pred.set_data(steps, pred_vals)
+        self.ax.relim()
+        self.ax.autoscale_view()
+        plt.pause(0.0005)  # brief pause to update display
+
+    def close(self):
+        plt.ioff()
+        plt.show()
+
+
+
 # brain = Brain()
 #
 # for (z, y, x), v in SEEDS:
@@ -33,7 +58,8 @@ import matplotlib.pyplot as plt
 #     return projection
 
 
-def plot_heatmap(grid, vmin=0.0, vmax=1.0, cmap="hot"):
-    plt.imshow(grid, vmin=vmin, vmax=vmax, cmap=cmap, origin="lower", interpolation="nearest")
-    plt.colorbar()
-    plt.show()
+# def plot_heatmap(grid, vmin=0.0, vmax=1.0, cmap="hot"):
+#     plt.imshow(grid, vmin=vmin, vmax=vmax, cmap=cmap, origin="lower", interpolation="nearest")
+#     plt.colorbar()
+#     plt.show()
+

@@ -2,19 +2,31 @@ from brain_sim.config import SIZE, SEEDS, ALPHA, BETA, STEPS, TICK_S
 from brain_sim.brain import Brain
 from brain_sim.update import step_predictive_sin
 from brain_sim.timing import FixedRateLoop
-from brain_sim.viz import plot_heatmap
+from brain_sim.viz import Viz
+
 
 def main():
     brain = Brain()
+    viz = Viz()
+    steps_log, real_vals, pred_vals = [], [], []
+    log_interval = 5
 
     for t in range(STEPS):
         step_predictive_sin(brain, ALPHA, BETA, t)
+
+        if t % log_interval == 0:
+            steps_log.append(t)
+            real_vals.append(brain.sns)
+            pred_vals.append(brain.sens_hat)
+            viz.update(steps_log, real_vals, pred_vals)
 
     print("Final sensory:", brain.sns)
     print("Final prediction:", brain.sens_hat)
     print("Final prediction error:", brain.error)
     print("Connections:", brain.connections)
     print("Predictions:", brain.prd)
+
+    viz.close()
 
 
 
