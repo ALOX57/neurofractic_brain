@@ -4,11 +4,17 @@ import math
 
 pattern_fn = PATTERNS[PATTERN_NAME]
 
+def parent_index(i):
+    return i // 10
+
 def step_predictive(brain, alpha, beta, t):
     brain.sns = pattern_fn(t)
     brain.sens_hat = sum(p * w for p,w in zip(brain.prd, brain.w_sens))
     brain.error = brain.sns - brain.sens_hat
-    brain.err_indiv = [brain.error * w for w in brain.w_sens]
+
+    for i in range(len(brain.prd)):
+        err_i = brain.error * brain.w_sens[i]
+        brain.err_i[i] = err_i
 
     # Update connection weights
     for i in range(len(brain.w_sens)):
@@ -19,27 +25,46 @@ def step_predictive(brain, alpha, beta, t):
     for i in range(len(brain.prd)):
         acc = brain.w_sens[i] * brain.sns # connection weight * current sensory firing
         brain.prd[i] = acc + beta * brain.prd[i] # add momentum of previous firing
-        brain.prd[i] = max(0, min(1.0, brain.prd[i])) # cap to predict between 0 and 1
+        brain.prd[i] = max(-1.0, min(1.0, brain.prd[i])) # cap to predict between 0 and 1
 
-        err_i = brain.w_sens[i] * brain.error
-        err_hat_i = sum(brain.prd2[k] * brain.w_err2[k][i] for k in range(len(brain.prd2)))
-        delta_err = err_i - err_hat_i
+        # L2 block indices for this L1 unit
+        start = i * 10
+        end = start + 10
+        err_i = brain.err_i[i]
 
-        fire_hat_i = sum(brain.prd2[k] * brain.w_fire2[k][i] for k in range(len(brain.prd2)))
+        err_hat_j = 0.0
+        fire_hat_i = 0.0
+        for j in range(start, end):
+            err_hat_j += brain.prd2[j] * brain.w_err2[j]
+            fire_hat_i += brain.prd2[j] * brain.w_fire2[j]
+        brain.err_hat[i] = err_hat_j
+        # brain.fire_hat[i] = fire_hat_i
+
+        delta_err = err_i - err_hat_j
+        # print(delta_err)
         delta_fire = brain.prd[i] - fire_hat_i
 
-        for k in range(len(brain.prd2)):
-            brain.w_err2[k][i] += alpha * delta_err * brain.prd2[k]
-            brain.w_err2[k][i] = max(-1.0, min(1.0, brain.w_err2[k][i]))
+        avg_pre2 = sum(abs(brain.prd2[j]) for j in range(start, end)) / 10.0
+        avg_pre2 = max(avg_pre2, 1e-6)
 
-            brain.w_fire2[k][i] += alpha * delta_fire * brain.prd2[k]
-            brain.w_fire2[k][i] = max(-1.0, min(1.0, brain.w_fire2[k][i]))
+        # update weights
+        for j in range(start, end):
+            pre2 = brain.prd2[j] / avg_pre2
+            # print(pre2)
+            brain.w_err2[j] += alpha * delta_err * pre2
+            brain.w_fire2[j] += alpha * delta_fire * pre2
 
+            brain.w_err2[j] = max(-1.0, min(1.0, brain.w_err2[j]))
+            brain.w_fire2[j] = max(-1.0, min(1.0, brain.w_fire2[j]))
 
     for i in range(len(brain.prd2)):
-        fire_input = sum(wf * f for wf,f in zip(brain.w_fire2[i], brain.prd))
-        err_input = sum(we * e for we,e in zip(brain.w_err2[i], brain.err_indiv))
+        parent = parent_index(i)  # which L1 neuron this L2 belongs to
+
+        fire_input = brain.w_fire2[i] * brain.prd[parent]
+        err_input = brain.w_err2[i] * brain.err_i[parent]
+
         brain.prd2[i] = fire_input + err_input + beta * brain.prd2[i]
+        brain.prd2[i] = max(-1.0, min(1.0, brain.prd2[i]))
 
 
 
