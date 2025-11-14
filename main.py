@@ -11,10 +11,12 @@ def main():
     brain = Brain()
     viz = Viz()
     viz2 = Viz()
-    viz2.ax.set_title("L2 Error Prediction")
+    viz2.ax.set_title("L3 Error Prediction")
     steps_log, real_vals, pred_vals = [], [], []
-    l1_err_vals, l2_pred_vals = [], []
-    log_interval = 5
+    l2_err_vals, l3_pred_vals = [], []
+    log_interval = 1
+
+    L2_INDEX = 40
 
     for t in range(STEPS):
         step_predictive(brain, ALPHA, BETA, t)
@@ -23,16 +25,18 @@ def main():
 
         if t % log_interval == 0:
             steps_log.append(t)
-            # real_vals.append(brain.sns)
-            # pred_vals.append(brain.sens_hat)
-            l1_err_vals.append(brain.err_i[2])
-            l2_pred_vals.append(brain.err_hat[2])
+            real_vals.append(brain.err_i[4])
+            pred_vals.append(brain.err_hat[4])
 
-            # l1_err_vals.append(brain.prd[0])
-            # l2_pred_vals.append(brain.fire_hat[0])
+            # actual total error at that L2 neuron
+            err2_i = brain.err_err2_i[L2_INDEX] + brain.err_fire2_i[L2_INDEX]
+            l2_err_vals.append(err2_i)
 
-            # viz.update(steps_log, real_vals, pred_vals)
-            viz2.update(steps_log, l1_err_vals, l2_pred_vals)
+            # L3's prediction for that L2 neuron
+            l3_pred_vals.append(brain.err2_hat[L2_INDEX])
+
+            viz.update(steps_log, real_vals, pred_vals)
+            viz2.update(steps_log, l2_err_vals, l3_pred_vals)
 
     print("Final sensory:", brain.sns)
     print("Final prediction:", brain.sens_hat)

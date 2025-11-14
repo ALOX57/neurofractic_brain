@@ -38,10 +38,9 @@ def step_predictive(brain, alpha, beta, t):
             err_hat_j += brain.prd2[j] * brain.w_err2[j]
             fire_hat_i += brain.prd2[j] * brain.w_fire2[j]
         brain.err_hat[i] = err_hat_j
-        # brain.fire_hat[i] = fire_hat_i
+        brain.fire_hat[i] = fire_hat_i
 
         delta_err = err_i - err_hat_j
-        # print(delta_err)
         delta_fire = brain.prd[i] - fire_hat_i
 
         avg_pre2 = sum(abs(brain.prd2[j]) for j in range(start, end)) / 10.0
@@ -50,7 +49,10 @@ def step_predictive(brain, alpha, beta, t):
         # update weights
         for j in range(start, end):
             pre2 = brain.prd2[j] / avg_pre2
-            # print(pre2)
+
+            brain.err_err2_i[j] = delta_err * brain.w_err2[j]
+            brain.err_fire2_i[j] = delta_fire * brain.w_fire2[j]
+
             brain.w_err2[j] += alpha * delta_err * pre2
             brain.w_fire2[j] += alpha * delta_fire * pre2
 
@@ -66,6 +68,47 @@ def step_predictive(brain, alpha, beta, t):
         brain.prd2[i] = fire_input + err_input + beta * brain.prd2[i]
         brain.prd2[i] = max(-1.0, min(1.0, brain.prd2[i]))
 
+        start = i * 10
+        end = start + 10
+        err2_i = brain.err_err2_i[i] + brain.err_fire2_i[i]
+
+        err2_hat = 0.0
+        fire2_hat = 0.0
+
+        for j in range(start, end):
+            err2_hat += brain.prd3[j] * brain.w_err3[j]
+            fire2_hat += brain.prd3[j] * brain.w_fire3[j]
+        brain.err2_hat[i] = err2_hat
+        brain.fire2_hat[i] = fire2_hat
+
+        delta_err2 = err2_i - err2_hat
+        delta_fire2 = brain.prd2[i] - fire2_hat
+
+        avg_pre3 = sum(abs(brain.prd3[j]) for j in range(start, end)) / 10.0
+        avg_pre3 = max(avg_pre3, 1e-6)
+
+        # update L3 weights
+        for j in range(start, end):
+            pre3 = brain.prd3[j] / avg_pre3
+
+            # brain.err_err3_i[j] = delta_err * brain.w_err3[j]       for layer 4
+            # brain.err_fire3_i[j] = delta_fire * brain.w_fire3[j]
+
+            brain.w_err3[j] += alpha * delta_err2 * pre3
+            brain.w_fire3[j] += alpha * delta_fire2 * pre3
+
+            brain.w_err3[j] = max(-1.0, min(1.0, brain.w_err3[j]))
+            brain.w_fire3[j] = max(-1.0, min(1.0, brain.w_fire3[j]))
+
+    for i in range(len(brain.prd3)):
+        parent2 = parent_index(i) # which L2 neuron this L3 belongs to
+        err2_i = brain.err_err2_i[parent2] + brain.err_fire2_i[parent2]
+
+        fire_input3 = brain.w_fire3[i] * brain.prd2[parent2]
+        err_input3 = brain.w_err3[i] * err2_i
+
+        brain.prd3[i] = fire_input3 + err_input3 + beta * brain.prd3[i]
+        brain.prd3[i] = max(-1.0, min(1.0, brain.prd3[i]))
 
 
 

@@ -6,7 +6,7 @@ class Viz:
     def __init__(self):
         plt.ion()  # interactive mode for live updating
         self.fig, self.ax = plt.subplots()
-        self.line_real, = self.ax.plot([], [], label="Real sine")
+        self.line_real, = self.ax.plot([], [], label="Real function")
         self.line_pred, = self.ax.plot([], [], label="Predicted", linestyle="--")
         self.ax.legend()
         self.ax.set_xlabel("Step")
