@@ -62,10 +62,9 @@ def step_predictive(brain, alpha, beta, t):
     for i in range(len(brain.prd2)):
         parent = parent_index(i)  # which L1 neuron this L2 belongs to
 
-        fire_input = brain.w_fire2[i] * brain.prd[parent]
         err_input = brain.w_err2[i] * brain.err_i[parent]
 
-        brain.prd2[i] = fire_input + err_input + beta * brain.prd2[i]
+        brain.prd2[i] = err_input + beta * brain.prd2[i]
         brain.prd2[i] = max(-1.0, min(1.0, brain.prd2[i]))
 
         start = i * 10
@@ -104,10 +103,9 @@ def step_predictive(brain, alpha, beta, t):
         parent2 = parent_index(i) # which L2 neuron this L3 belongs to
         err2_i = brain.err_err2_i[parent2] + brain.err_fire2_i[parent2]
 
-        fire_input3 = brain.w_fire3[i] * brain.prd2[parent2]
         err_input3 = brain.w_err3[i] * err2_i
 
-        brain.prd3[i] = fire_input3 + err_input3 + beta * brain.prd3[i]
+        brain.prd3[i] = err_input3 + beta * brain.prd3[i]
         brain.prd3[i] = max(-1.0, min(1.0, brain.prd3[i]))
 
 
