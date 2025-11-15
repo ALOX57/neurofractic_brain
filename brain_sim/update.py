@@ -23,8 +23,14 @@ def step_predictive(brain, alpha, beta, t):
 
     # Predicts next tick
     for i in range(len(brain.prd)):
-        acc = brain.w_sens[i] * brain.sns # connection weight * current sensory firing
-        brain.prd[i] = acc + beta * brain.prd[i] # add momentum of previous firing
+        top = brain.fire_hat[i]
+        base = brain.w_sens[i] * brain.sns + beta * brain.prd[i]
+
+        # brain.prd[i] = base
+
+        eta = 0.1
+
+        brain.prd[i] = base + eta * (top - brain.prd[i])
         brain.prd[i] = max(-1.0, min(1.0, brain.prd[i])) # cap to predict between 0 and 1
 
         # L2 block indices for this L1 unit
@@ -61,10 +67,13 @@ def step_predictive(brain, alpha, beta, t):
 
     for i in range(len(brain.prd2)):
         parent = parent_index(i)  # which L1 neuron this L2 belongs to
-
+        top = brain.fire2_hat[i]
         err_input = brain.w_err2[i] * brain.err_i[parent]
 
-        brain.prd2[i] = err_input + beta * brain.prd2[i]
+        eta = 0.1
+
+        brain.prd2[i] = err_input + beta * brain.prd2[i] + eta * (top - brain.prd2[i])
+        # brain.prd2[i] = err_input + beta * brain.prd2[i]
         brain.prd2[i] = max(-1.0, min(1.0, brain.prd2[i]))
 
         start = i * 10
