@@ -1,5 +1,4 @@
 SIZE = 15
-OFF = [-1, 0, 1]
 
 ALPHA = 0.1
 BETA = 0.01

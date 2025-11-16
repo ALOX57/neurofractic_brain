@@ -1,4 +1,4 @@
-from .config import SIZE, OFF
+from .config import SIZE
 import random
 
 class Brain:
@@ -10,11 +10,9 @@ class Brain:
 
         self.err_i = [0 for _ in range(10)]
 
-        self.err_hat = [0 for _ in range(10)]
         self.fire_hat = [0 for _ in range(10)]
 
         # storing individual errors for layer 2
-        self.err_err2_i = [0 for _ in range(100)]
         self.err_fire2_i = [0 for _ in range(100)]
 
         self.err2_hat = [0 for _ in range(100)]
